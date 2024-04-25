@@ -1,0 +1,36 @@
+{
+  "name": "@alxcube/di-container",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/di-container.umd.cjs",
+  "module": "./dist/di-container.js",
+  "types": "./dist/di-container.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/di-container.js",
+      "require": "./dist/di-container.umd.cjs"
+    }
+  },
+  "scripts": {
+    "build": "tsc && vite build",
+    "test": "vitest --run"
+  },
+  "author": "Alexander Alexandrov <alxcube@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.4",
+    "@types/node": "^20.12.7",
+    "@typescript-eslint/eslint-plugin": "^7.7.1",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-prettier": "^5.1.3",
+    "prettier": "^3.2.5",
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0",
+    "vite-plugin-banner": "^0.7.1",
+    "vite-plugin-dts": "^3.9.0",
+    "vitest": "^1.5.2"
+  }
+}
