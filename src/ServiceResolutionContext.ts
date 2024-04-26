@@ -13,7 +13,7 @@ export interface ServiceResolutionContext<TServicesMap extends ServicesMap>
   /**
    * Returns array of service resolution stack, which has records of services stack being resolved in current request.
    * The first element (at index 0) is the root service, for which dependencies are resolved. The last element is
-   * service name, being resolved at the moment.
+   * service name, being resolved at the moment (which ServiceFactory is called).
    */
   getStack(): NamedServiceRecord<TServicesMap>[];
 
@@ -38,7 +38,7 @@ export interface ServiceResolutionContext<TServicesMap extends ServicesMap>
   /**
    * Delays given callback. The callback will be executed after current dependencies stack is resolved.
    * Used to resolve circular dependencies.
-   * IMPORTANT: circular dependencies both must have "request" or "singleton" lifecycle.
+   * IMPORTANT: circular dependencies must have "request" or "singleton" lifecycle.
    *
    * @param callback
    */

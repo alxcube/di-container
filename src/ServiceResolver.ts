@@ -1,5 +1,17 @@
 /**
- * Services map.
+ * Services map. Defines service types, available in container. This base empty interface should be extended in
+ * consuming application.
+ * Interface property keys are strings, which are service keys, and values are service types.
+ *
+ * @exapmle
+ *
+ * ```ts
+ * interface AppTypesMap extends ServicesMap {
+ *   HttpClient: HttpClient;
+ *   BackendApiClient: BackendApiClient;
+ *   applicationKey: string;
+ * }
+ * ```
  */
 export interface ServicesMap {}
 
@@ -15,7 +27,7 @@ export type Constructor<ConstructedType extends object> = {
 };
 
 /**
- * Service key.
+ * Service key, used for service registration, resolution etc. This is either keyof ServicesMap, or class Constructor.
  */
 export type ServiceKey<TServicesMap extends ServicesMap> =
   | keyof TServicesMap
@@ -42,6 +54,11 @@ export interface NamedServiceRecord<TServicesMap extends ServicesMap> {
   name: string;
 }
 
+/**
+ * Type guard for NamedServiceRecord.
+ *
+ * @param obj
+ */
 export function isNamedServiceRecord(
   obj: unknown
 ): obj is NamedServiceRecord<object> {
@@ -56,21 +73,21 @@ export function isNamedServiceRecord(
 }
 
 /**
- * Service key or NamedServiceRecord.
+ * ServiceKey or NamedServiceRecord. Used for services tuple resolution, declaring class dependencies etc.
  */
 export type ServiceToken<TServicesMap extends ServicesMap> =
   | ServiceKey<TServicesMap>
   | NamedServiceRecord<TServicesMap>;
 
 /**
- * Array of service keys in ServicesMap or NamedServiceRecord objects.
+ * Tuple of ServiceToken's.
  */
 export type ServiceTokensTuple<TServicesMap extends ServicesMap> = [
   ...ServiceToken<TServicesMap>[],
 ];
 
 /**
- * Utility type. Resolves service type using ServicesMap and service key or NamedServiceRecord.
+ * Utility type. Infers service type, resolved using ServiceToken.
  */
 export type ResolvedByToken<
   TServicesMap extends ServicesMap,
@@ -83,7 +100,7 @@ export type ResolvedByToken<
       : never;
 
 /**
- * Utility type. Maps service key / NamedServiceRecord array to resolved services array type.
+ * Utility type. Maps ServiceTokensTuple to resolved services tuple.
  */
 export type ResolvedServicesTuple<
   TServiceMap extends ServicesMap,
@@ -97,7 +114,7 @@ export type ResolvedServicesTuple<
  */
 export interface ServiceResolver<TServicesMap extends ServicesMap> {
   /**
-   * Resolves single service by its key in ServicesMap and optional name. If name is omitted or is `undefined`,
+   * Resolves single service by its ServiceKey and optional name. If name is omitted or is `undefined`,
    * "default" is used as name.
    *
    * @param key
@@ -119,7 +136,7 @@ export interface ServiceResolver<TServicesMap extends ServicesMap> {
   ): ResolvedByKey<TServicesMap, TServiceKey>[];
 
   /**
-   * Resolves tuple of services, using given array of service keys / NamedServiceRecord objects. Used to get independent
+   * Resolves tuple of services, using given ServiceTokensTuple. Used to get independent
    * services in single resolution context, which means that same instance of services, having 'request' lifecycle
    * will be resolved. There is no need to call this method inside service factories, since they're already resolves
    * services in same context.

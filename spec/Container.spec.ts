@@ -1,10 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { circular, Container, ServiceResolutionError } from "../src";
-import type {
-  ServiceContainer,
-  ServiceModule,
-  ServicesMap,
-} from "../src";
+import type { ServiceContainer, ServiceModule, ServicesMap } from "../src";
 
 describe("Container class", () => {
   class DummyService {
@@ -963,7 +959,7 @@ describe("Container class", () => {
     });
   });
 
-  describe("registerModule() method", () => {
+  describe("loadModule() method", () => {
     it("should call module's register() method, and return function that unregisters module", () => {
       const module: ServiceModule<TestServicesMap> = {
         register(container: ServiceContainer<TestServicesMap>): void {
@@ -972,7 +968,7 @@ describe("Container class", () => {
       };
 
       expect(container.has(DummyService)).toBe(false);
-      container.registerModule(module);
+      container.loadModule(module);
       expect(container.has(DummyService)).toBe(true);
     });
   });

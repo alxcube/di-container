@@ -114,6 +114,9 @@ export class Container<TServicesMap extends ServicesMap>
     this.registerConstantOrFactory(key, factory, true, options);
   }
 
+  /**
+   * @inheritDoc
+   */
   registerClassConfig<
     ConstructorType extends Constructor<object>,
     DepsTuple extends DependenciesTuple<
@@ -141,6 +144,9 @@ export class Container<TServicesMap extends ServicesMap>
     );
   }
 
+  /**
+   * @inheritdoc
+   */
   implement<
     TServiceKey extends keyof TServicesMap,
     ConstructorType extends InterfaceImplementation<TServicesMap, TServiceKey>,
@@ -170,7 +176,10 @@ export class Container<TServicesMap extends ServicesMap>
     );
   }
 
-  registerModule(module: ServiceModule<TServicesMap>): void {
+  /**
+   * @inheritDoc
+   */
+  loadModule(module: ServiceModule<TServicesMap>): void {
     return module.register(this);
   }
 
@@ -270,6 +279,9 @@ export class Container<TServicesMap extends ServicesMap>
     return registrations.map(({ name }) => name);
   }
 
+  /**
+   * @inheritdoc
+   */
   instantiate<
     ConstructorType extends Constructor<object>,
     DepsTuple extends DependenciesTuple<
@@ -283,6 +295,31 @@ export class Container<TServicesMap extends ServicesMap>
     const factory = this.createFactoryForConstructor(constructor, deps);
     const context = new Context(this.getMergedRegistry());
     return factory(context);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  createArrayResolver<TServiceKey extends ServiceKey<TServicesMap>>(
+    key: TServiceKey,
+    arrayKey: ServiceResolvingKey<
+      TServicesMap,
+      ResolvedByKey<TServicesMap, TServiceKey>[]
+    >,
+    options?: ServiceFactoryRegistrationOptions
+  ) {
+    this.registerFactory(
+      arrayKey,
+      (context) =>
+        context.resolveAll(key) as ResolvedByKey<
+          TServicesMap,
+          ServiceResolvingKey<
+            TServicesMap,
+            ResolvedByKey<TServicesMap, TServiceKey>[]
+          >
+        >,
+      options
+    );
   }
 
   /**
@@ -462,6 +499,14 @@ export class Container<TServicesMap extends ServicesMap>
     };
   }
 
+  /**
+   * Creates ServiceFactory function for given class constructor.
+   *
+   * @param constructor
+   * @param deps
+   * @param hasCircularDeps
+   * @private
+   */
   private createFactoryForConstructor<
     ConstructorType extends Constructor<object>,
     DepsTuple extends DependenciesTuple<
@@ -499,27 +544,5 @@ export class Container<TServicesMap extends ServicesMap>
     }
 
     return factory;
-  }
-
-  createArrayResolver<TServiceKey extends ServiceKey<TServicesMap>>(
-    key: TServiceKey,
-    arrayKey: ServiceResolvingKey<
-      TServicesMap,
-      ResolvedByKey<TServicesMap, TServiceKey>[]
-    >,
-    options?: ServiceFactoryRegistrationOptions
-  ) {
-    this.registerFactory(
-      arrayKey,
-      (context) =>
-        context.resolveAll(key) as ResolvedByKey<
-          TServicesMap,
-          ServiceResolvingKey<
-            TServicesMap,
-            ResolvedByKey<TServicesMap, TServiceKey>[]
-          >
-        >,
-      options
-    );
   }
 }

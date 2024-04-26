@@ -7,6 +7,9 @@ import type {
   ServicesMap,
 } from "./ServiceResolver";
 
+/**
+ * Utility type. Infers union of keys of ServicesMap, which type is as given. Used for typing class dependencies tuple.
+ */
 export type ServiceResolvingKey<
   TServicesMap extends ServicesMap,
   ResolvedType,
@@ -14,27 +17,51 @@ export type ServiceResolvingKey<
   [K in keyof TServicesMap]: TServicesMap[K] extends ResolvedType ? K : never;
 }[keyof TServicesMap];
 
+/**
+ * Utility type. Infers NamedServiceRecord, resolving given ResolvedType. Used for typing class dependencies tuple.
+ */
 type ServiceResolvingToken<TServicesMap extends ServicesMap, ResolvedType> = {
+  /**
+   * ServiceKey, resolving given ResolvedType
+   */
   service:
     | ServiceResolvingKey<TServicesMap, ResolvedType>
     | (ResolvedType extends object ? Constructor<ResolvedType> : never);
+
+  /**
+   * Service name.
+   */
   name: string;
 };
 
+/**
+ * Special object interface for providing constant class dependencies, when some class depends on primitive types.
+ */
 export interface ConstantToken<T> {
   constant: T;
 }
 
+/**
+ * Type guard for ConstantToken.
+ *
+ * @param obj
+ */
 export function isConstantToken(obj: unknown): obj is ConstantToken<unknown> {
   return typeof obj === "object" && obj !== null && "constant" in obj;
 }
 
+/**
+ * Type alias of class dependency token.
+ */
 export type DependencyToken<TServicesMap extends ServicesMap, ResolvedType> =
   | ServiceResolvingKey<TServicesMap, ResolvedType>
   | ServiceResolvingToken<TServicesMap, ResolvedType>
   | ConstantToken<ResolvedType>
   | (ResolvedType extends object ? Constructor<ResolvedType> : never);
 
+/**
+ * Utility type. Infers tuple of DependencyToken's, which resolves tuple of class constructor arguments.
+ */
 export type DependenciesTuple<
   TServicesMap extends ServicesMap,
   Tuple extends [...unknown[]],
@@ -42,11 +69,15 @@ export type DependenciesTuple<
   [K in keyof Tuple]: DependencyToken<TServicesMap, Tuple[K]>;
 } & { length: Tuple["length"] };
 
+/**
+ * Utility type. Infers constructor of type, resolved using given TServiceKey. Infers `never`, when type, resolved
+ * by given key, is not object type.
+ */
 export type InterfaceImplementation<
   TServicesMap extends ServicesMap,
-  ServiceKey extends keyof TServicesMap,
-> = TServicesMap[ServiceKey] extends object
-  ? Constructor<TServicesMap[ServiceKey]>
+  TServiceKey extends keyof TServicesMap,
+> = TServicesMap[TServiceKey] extends object
+  ? Constructor<TServicesMap[TServiceKey]>
   : never;
 
 /**
@@ -56,12 +87,20 @@ export interface ServiceFactory<TServicesMap extends ServicesMap, ServiceType> {
   (context: ServiceResolutionContext<TServicesMap>): ServiceType;
 }
 
+/**
+ * Service module interface.
+ */
 export interface ServiceModule<TServicesMap extends ServicesMap> {
+  /**
+   * Performs services registrations in given container.
+   *
+   * @param container
+   */
   register(container: ServiceContainer<TServicesMap>): void;
 }
 
 /**
- * Service lifecycle:
+ * Lifecycle of services, created using factories:
  * - "transient": creates new service instance each time service is requested.
  * - "singleton": creates service instance when service is requested first time, and returns that service instance
  *    in all further service requests.
@@ -101,8 +140,15 @@ export interface ServiceFactoryRegistrationOptions
   lifecycle?: ServiceLifecycle;
 }
 
+/**
+ * Class config registration options.
+ */
 export interface ClassRegistrationOptions
   extends ServiceFactoryRegistrationOptions {
+  /**
+   * Must be `true` for classes with circular dependencies.
+   * @default false
+   */
   circular?: boolean;
 }
 
@@ -140,6 +186,21 @@ export interface ServiceContainer<TServicesMap extends ServicesMap>
     options?: ServiceFactoryRegistrationOptions
   ): void;
 
+  /**
+   * Registers class dependencies configuration, using class as key. Multiple configurations can be registered, using
+   * different names. If name is omitted, the name "default" is assigned implicitly.
+   *
+   * @param constructor
+   * @param deps
+   * @param options
+   *
+   * @example
+   *
+   * ```ts
+   * container.registerClassConfig(TextDecoder, [{constant: "utf-8"}]);
+   * container.registerClassConfig(TextDecoder, [{constant: "KOI8-R"}], {name: "koi8-r"});
+   * ```
+   */
   registerClassConfig<
     ConstructorType extends Constructor<object>,
     DepsTuple extends DependenciesTuple<
@@ -152,6 +213,24 @@ export interface ServiceContainer<TServicesMap extends ServicesMap>
     options?: ClassRegistrationOptions
   ): void;
 
+  /**
+   * Registers interface implementation, using key of ServicesMap, implementation constructor and DependenciesTuple.
+   *
+   * @param key
+   * @param implementation
+   * @param deps
+   * @param options
+   *
+   * @example
+   * ```ts
+   * class ConcreteApiClient implements ApiClient {
+   *    constructor(private readonly httpClient: HttpClient) {}
+   *    // ...
+   * }
+   *
+   * container.implement("ApiClient", ConcreteApiClient, ["HttpClient"]);
+   * ```
+   */
   implement<
     ServiceKey extends keyof TServicesMap,
     ConstructorType extends InterfaceImplementation<TServicesMap, ServiceKey>,
@@ -166,7 +245,12 @@ export interface ServiceContainer<TServicesMap extends ServicesMap>
     options?: ClassRegistrationOptions
   ): void;
 
-  registerModule(module: ServiceModule<TServicesMap>): void;
+  /**
+   * Loads ServiceModule.
+   *
+   * @param module
+   */
+  loadModule(module: ServiceModule<TServicesMap>): void;
 
   /**
    * Removes service registration. When name is omitted or is `undefined`, removes all registrations of that
@@ -222,6 +306,12 @@ export interface ServiceContainer<TServicesMap extends ServicesMap>
    */
   restore(cascade?: boolean): void;
 
+  /**
+   * Creates instance of given class. Constructor dependencies are resolved, using DependenciesTuple.
+   *
+   * @param constructor
+   * @param deps
+   */
   instantiate<
     ConstructorType extends Constructor<object>,
     DepsTuple extends DependenciesTuple<
@@ -233,6 +323,25 @@ export interface ServiceContainer<TServicesMap extends ServicesMap>
     deps: DepsTuple
   ): InstanceType<ConstructorType>;
 
+  /**
+   * Generates ServiceFactory of array of given services under `arrayKey`.
+   *
+   * @param key
+   * @param arrayKey
+   * @param options
+   *
+   * @example
+   * ```ts
+   * interface TypesMap extends ServicesMap {
+   *  DatabaseConnection: DatabaseConnection;
+   *  "DatabaseConnection[]": DatabaseConnection[];
+   * }
+   *
+   * // ...
+   *
+   * container.createArrayResolver("DatabaseConnection", "DatabaseConnection[]");
+   * ```
+   */
   createArrayResolver<TServiceKey extends ServiceKey<TServicesMap>>(
     key: TServiceKey,
     arrayKey: ServiceResolvingKey<
