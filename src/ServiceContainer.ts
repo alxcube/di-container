@@ -152,7 +152,20 @@ export interface ClassRegistrationOptions
    * @default false
    */
   circular?: boolean;
+
+  /**
+   * Saves class name, associated with given class constructor. This name will appear in error messages and is
+   * useful for situations when class names gets minified and lose their meaning. Class name is associates with
+   * constructor, so registration `name` option is ignored.
+   */
+  className?: string;
 }
+
+/**
+ * Interface implementation registration options.
+ */
+export interface ImplementationRegistrationOptions
+  extends Omit<ClassRegistrationOptions, "className"> {}
 
 /**
  * Service container interface.
@@ -244,7 +257,7 @@ export interface ServiceContainer<TServicesMap extends ServicesMap>
     key: ServiceKey,
     implementation: ConstructorType,
     deps: DepsTuple,
-    options?: ClassRegistrationOptions
+    options?: ImplementationRegistrationOptions
   ): void;
 
   /**

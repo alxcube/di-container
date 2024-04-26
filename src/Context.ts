@@ -8,6 +8,7 @@ import type {
   ServicesMap,
   ServiceKey,
   ResolvedByKey,
+  Constructor,
 } from "./ServiceResolver";
 import { stringifyServiceKey } from "./stringifyServiceKey";
 
@@ -71,12 +72,14 @@ export class Context<TServicesMap extends ServicesMap>
    * Context constructor.
    *
    * @param registry
+   * @param classNames
    */
   constructor(
     private readonly registry: Map<
       ServiceKey<TServicesMap>,
       ServiceRegistration<TServicesMap, unknown>[]
-    >
+    >,
+    private readonly classNames: Map<Constructor<object>, string>
   ) {
     this.resolved = new Map();
     this.resolutionStack = [];
@@ -234,7 +237,7 @@ export class Context<TServicesMap extends ServicesMap>
     if (!registration.factory) {
       // Make sure we have service factory
       throw new TypeError(
-        `Service "${stringifyServiceKey(key)}" has neither instance, nor factory.`
+        `Service "${stringifyServiceKey(key, this.classNames)}" has neither instance, nor factory.`
       );
     }
 
@@ -282,7 +285,7 @@ export class Context<TServicesMap extends ServicesMap>
         throw e;
       }
       throw new ServiceResolutionError(
-        `An error occurred in "${stringifyServiceKey(key)}" service factory, named "${name}"`,
+        `An error occurred in "${stringifyServiceKey(key, this.classNames)}" service factory, named "${name}"`,
         this.getStack(),
         e
       );
@@ -361,13 +364,13 @@ export class Context<TServicesMap extends ServicesMap>
       | undefined;
     if (!registrations) {
       throw new RangeError(
-        `Service "${stringifyServiceKey(key)}" is not found.`
+        `Service "${stringifyServiceKey(key, this.classNames)}" is not found.`
       );
     }
     const registration = registrations.find((record) => record.name === name);
     if (!registration) {
       throw new RangeError(
-        `Service "${stringifyServiceKey(key)}", named "${name}" is not found.`
+        `Service "${stringifyServiceKey(key, this.classNames)}", named "${name}" is not found.`
       );
     }
     return registration;
@@ -380,7 +383,8 @@ export class Context<TServicesMap extends ServicesMap>
    */
   private checkForCircularDependency() {
     const resolutionStackPath = this.resolutionStack.map(
-      (entry) => `${stringifyServiceKey(entry.service)}[${entry.name}]`
+      (entry) =>
+        `${stringifyServiceKey(entry.service, this.classNames)}[${entry.name}]`
     );
     const current = resolutionStackPath.pop();
     if (!current) {

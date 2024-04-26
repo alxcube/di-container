@@ -6,6 +6,7 @@ import {
   type ServiceRegistration,
   type ServiceKey,
   type ServicesMap,
+  type Constructor,
 } from "../src";
 
 describe("Context class", () => {
@@ -58,6 +59,7 @@ describe("Context class", () => {
     ServiceRegistration<TestServicesMap, unknown>[]
   >;
   let resolver: Context<TestServicesMap>;
+  let classNames: Map<Constructor<object>, string>;
 
   beforeEach(() => {
     dummyServiceInstance = new DummyService();
@@ -126,7 +128,8 @@ describe("Context class", () => {
       },
     ]);
 
-    resolver = new Context<TestServicesMap>(registry);
+    classNames = new Map();
+    resolver = new Context<TestServicesMap>(registry, classNames);
   });
 
   describe("resolve() method", () => {
@@ -242,6 +245,20 @@ describe("Context class", () => {
       expect(() => resolver.resolve("DummyServiceContainer")).toThrow(
         ServiceResolutionError
       );
+    });
+
+    it("should throw ServiceResolutionError, containing given class name, when class names map contains record for that class", () => {
+      classNames.set(DummyService, "AwesomeService");
+      registry.set(DummyService, [
+        {
+          factory: () => {
+            throw new Error("Error");
+          },
+          lifecycle: "transient",
+          name: "default",
+        },
+      ]);
+      expect(() => resolver.resolve(DummyService)).toThrow("AwesomeService");
     });
 
     it("should resolve services by constructor as key", () => {

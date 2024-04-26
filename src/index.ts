@@ -6,4 +6,3 @@ export * from "./ServiceContainer";
 export * from "./ServiceResolutionContext";
 export * from "./ServiceResolutionError";
 export * from "./ServiceResolver";
-export * from "./stringifyServiceKey";
