@@ -13,9 +13,13 @@ import type {
 export type ServiceResolvingKey<
   TServicesMap extends ServicesMap,
   ResolvedType,
-> = {
-  [K in keyof TServicesMap]: TServicesMap[K] extends ResolvedType ? K : never;
-}[keyof TServicesMap];
+> =
+  | {
+      [K in keyof TServicesMap]: TServicesMap[K] extends ResolvedType
+        ? K
+        : never;
+    }[keyof TServicesMap]
+  | (ResolvedType extends object ? Constructor<ResolvedType> : never);
 
 /**
  * Utility type. Infers NamedServiceRecord, resolving given ResolvedType. Used for typing class dependencies tuple.
@@ -24,9 +28,7 @@ type ServiceResolvingToken<TServicesMap extends ServicesMap, ResolvedType> = {
   /**
    * ServiceKey, resolving given ResolvedType
    */
-  service:
-    | ServiceResolvingKey<TServicesMap, ResolvedType>
-    | (ResolvedType extends object ? Constructor<ResolvedType> : never);
+  service: ServiceResolvingKey<TServicesMap, ResolvedType>;
 
   /**
    * Service name.
