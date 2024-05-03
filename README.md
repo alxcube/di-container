@@ -295,12 +295,6 @@ The third argument is an options object. In addition to options of
 [`registerFactory()`](#registering-service-factory) method, there are 2 other options:
 * `circular` - this should be set to true, when class has circular dependencies. See
 details below in corresponding section.
-* `className` - this option takes a string that will be substituted into error messages
-when resolving this class. It simplifies understanding where an error occurred after your
-code has been minified and classes used as keys have lost meaningful names. There is no
-point in using this option more than once when registering multiple class configurations
-because under the hood, it is associated with the constructor object itself rather than
-with configuration variations.
 
 
 Please note that you can pass dependencies that are not directly extracted from the
@@ -337,6 +331,15 @@ container.registerClassConfig(
     TextDecoder, // Dependency on class
   ]
 );
+```
+
+You also can use `classNames` Map for binding constructors to their names. This helps
+to keep meaningful class names in error messages after your code gets minified.
+
+```ts
+import { classNames } from "@alxcube/di-container";
+
+classNames.set(ConcreteHttpClient, "ConcreteHttpClient");
 ```
 
 #### Registering Interface Implementation

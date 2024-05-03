@@ -6,7 +6,7 @@ import {
   type ServiceRegistration,
   type ServiceKey,
   type ServicesMap,
-  type Constructor,
+  classNames,
 } from "../src";
 
 describe("Context class", () => {
@@ -59,7 +59,6 @@ describe("Context class", () => {
     ServiceRegistration<TestServicesMap, unknown>[]
   >;
   let resolver: Context<TestServicesMap>;
-  let classNames: Map<Constructor<object>, string>;
 
   beforeEach(() => {
     dummyServiceInstance = new DummyService();
@@ -128,8 +127,7 @@ describe("Context class", () => {
       },
     ]);
 
-    classNames = new Map();
-    resolver = new Context<TestServicesMap>(registry, classNames);
+    resolver = new Context<TestServicesMap>(registry);
   });
 
   describe("resolve() method", () => {

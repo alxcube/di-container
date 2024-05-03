@@ -53,18 +53,6 @@ export class Container<TServicesMap extends ServicesMap>
   >[];
 
   /**
-   * Class names, associates with constructors registry.
-   * @private
-   */
-  private classNames: Map<Constructor<object>, string>;
-
-  /**
-   * Backup storage for class names snapshots.
-   * @private
-   */
-  private readonly classNamesSnapshots: Map<Constructor<object>, string>[];
-
-  /**
    * Container constructor.
    *
    * @param parent
@@ -72,8 +60,6 @@ export class Container<TServicesMap extends ServicesMap>
   constructor(private readonly parent?: Container<TServicesMap>) {
     this.registry = new Map();
     this.snapshots = [];
-    this.classNames = new Map();
-    this.classNamesSnapshots = [];
   }
 
   /**
@@ -83,10 +69,7 @@ export class Container<TServicesMap extends ServicesMap>
     key: TServiceKey,
     name?: string
   ): ResolvedByKey<TServicesMap, TServiceKey> {
-    return new Context(
-      this.getMergedRegistry(),
-      this.getMergedClassNames()
-    ).resolve(key, name);
+    return new Context(this.getMergedRegistry()).resolve(key, name);
   }
 
   /**
@@ -95,10 +78,7 @@ export class Container<TServicesMap extends ServicesMap>
   resolveAll<TServiceKey extends ServiceKey<TServicesMap>>(
     key: TServiceKey
   ): ResolvedByKey<TServicesMap, TServiceKey>[] {
-    return new Context(
-      this.getMergedRegistry(),
-      this.getMergedClassNames()
-    ).resolveAll(key);
+    return new Context(this.getMergedRegistry()).resolveAll(key);
   }
 
   /**
@@ -107,10 +87,7 @@ export class Container<TServicesMap extends ServicesMap>
   resolveTuple<ServiceKeys extends ServiceTokensTuple<TServicesMap>>(
     services: ServiceKeys
   ): ResolvedServicesTuple<TServicesMap, ServiceKeys> {
-    return new Context(
-      this.getMergedRegistry(),
-      this.getMergedClassNames()
-    ).resolveTuple(services);
+    return new Context(this.getMergedRegistry()).resolveTuple(services);
   }
 
   /**
@@ -166,10 +143,6 @@ export class Container<TServicesMap extends ServicesMap>
       >,
       options
     );
-
-    if (options.className !== undefined) {
-      this.classNames.set(constructor, options.className);
-    }
   }
 
   /**
@@ -276,8 +249,6 @@ export class Container<TServicesMap extends ServicesMap>
     this.snapshots.push(this.registry);
     this.registry = newRegistry;
 
-    this.classNamesSnapshots.push(new Map(this.classNames));
-
     if (this.parent && cascade) {
       this.parent.backup(true);
     }
@@ -291,11 +262,6 @@ export class Container<TServicesMap extends ServicesMap>
     if (snapshot) {
       this.registry.clear();
       this.registry = snapshot;
-    }
-
-    const classNamesSnapshot = this.classNamesSnapshots.pop();
-    if (classNamesSnapshot) {
-      this.classNames = classNamesSnapshot;
     }
 
     if (this.parent && cascade) {
@@ -329,10 +295,7 @@ export class Container<TServicesMap extends ServicesMap>
     deps: DepsTuple
   ): InstanceType<ConstructorType> {
     const factory = this.createFactoryForConstructor(constructor, deps);
-    const context = new Context(
-      this.getMergedRegistry(),
-      this.getMergedClassNames()
-    );
+    const context = new Context(this.getMergedRegistry());
     return factory(context);
   }
 
@@ -507,7 +470,7 @@ export class Container<TServicesMap extends ServicesMap>
 
     if (!options.replace) {
       throw new TypeError(
-        `Service "${stringifyServiceKey(key, this.classNames)}", named "${name}", already registered. Set 'replace' option to true, if you want to replace registration.`
+        `Service "${stringifyServiceKey(key)}", named "${name}", already registered. Set 'replace' option to true, if you want to replace registration.`
       );
     }
 
@@ -583,20 +546,5 @@ export class Container<TServicesMap extends ServicesMap>
     }
 
     return factory;
-  }
-
-  /**
-   * Returns class names storage, merging all parent container class names storages.
-   *
-   * @protected
-   */
-  protected getMergedClassNames(): Map<Constructor<object>, string> {
-    const classNames: Map<Constructor<object>, string> = this.parent
-      ? this.parent.getMergedClassNames()
-      : new Map();
-    for (const [key, val] of this.classNames) {
-      classNames.set(key, val);
-    }
-    return classNames;
   }
 }

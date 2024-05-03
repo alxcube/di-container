@@ -1,4 +1,5 @@
 import type { NamedServiceRecord, ServicesMap } from "./ServiceResolver";
+import { stringifyServiceKey } from "./stringifyServiceKey";
 
 /**
  * Service resolution error class.
@@ -23,7 +24,7 @@ export class ServiceResolutionError<
       .reverse()
       .map(
         (entry) =>
-          `Resolving service ${String(entry.service)}, named "${entry.name}"`
+          `Resolving service ${stringifyServiceKey(entry.service)}, named "${entry.name}"`
       )
       .join("\n");
 
