@@ -394,6 +394,22 @@ describe("Container class", () => {
       expect(childContainer.resolve(DummyService)).toBeInstanceOf(DummyService);
     });
 
+    it("should throw ServiceResolutionError with RangeError as cause, when dependency is not registered", () => {
+      container.registerClassConfig(DummyDependent, [
+        DummyService,
+        DummyService,
+      ]);
+      try {
+        container.resolve(DummyDependent);
+        expect.fail("Should throw");
+      } catch (e) {
+        expect(e).toBeInstanceOf(ServiceResolutionError);
+        expect(
+          (e as ServiceResolutionError<TestServicesMap>).cause
+        ).toBeInstanceOf(RangeError);
+      }
+    });
+
     describe("circular dependencies resolution, using delay() method", () => {
       beforeEach(() => {
         container.registerFactory(
