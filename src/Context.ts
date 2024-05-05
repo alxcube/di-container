@@ -374,7 +374,7 @@ export class Context<TServicesMap extends ServicesMap>
   }
 
   /**
-   * Checks for circular dependencies and throws ServiceResolutionError, if circular dependency was found.
+   * Checks for circular dependencies and throws Error, if circular dependency was found.
    *
    * @private
    */
@@ -410,7 +410,9 @@ export class Context<TServicesMap extends ServicesMap>
 
     // Circular dependency detected.
     const circularPath = first.join(" < ") + ` < (CIRCULAR) ${current}`;
-    throw new Error(`Circular dependency detected: ${circularPath}`);
+    throw new Error(
+      `Circular dependency detected: ${circularPath}.\nRefer to the documentation for options for resolving circular dependencies.`
+    );
   }
 
   /**
