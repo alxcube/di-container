@@ -3,6 +3,25 @@
 Simple but flexible type-safe dependency injection container for TypeScript
 applications.
 
+## Key Features
+
+* **Flexible Service Creation**: Utilize factories to create services with injected
+dependencies and customizable configurations, enhancing flexibility in service instantiation.
+* **Interface-Implementation Binding**: Seamlessly link interfaces with their respective
+implementations.
+* **Lifecycle Management**: Control the lifecycle of services with support for *transient*,
+*singleton*, and *request* scopes.
+* **Circular Dependency Support**: Handle circular dependencies gracefully.
+* **Contextual Resolution**: Dynamically resolve dependencies based on the context,
+enhancing adaptability.
+* **Type Safety**: Ensure type safety throughout the dependency injection process,
+enhancing code robustness and reliability.
+* **Error Handling**: Detect and manage errors during service resolution with clear and 
+informative error messages, facilitating debugging.
+* **Testing Support**: Simplify unit testing by instantiating classes with injected
+dependencies using the container's features. Additionally, backup and restore container
+state for seamless testing.
+
 ## Installation
 
 ```shell
