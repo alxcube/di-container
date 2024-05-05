@@ -637,7 +637,7 @@ describe("Context class", () => {
       expect(service2).toBeInstanceOf(DummyService);
     });
 
-    it("should resolve tuple of services by NamedServiceRecord", () => {
+    it("should resolve tuple of services by NamedServiceKey", () => {
       const [service1, service2] = resolver.resolveTuple([
         { service: "DummyService", name: "default" },
         { service: "DummyServiceContainer", name: "default" },

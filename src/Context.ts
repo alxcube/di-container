@@ -2,7 +2,7 @@ import type { ServiceFactory, ServiceLifecycle } from "./ServiceContainer";
 import type { ServiceResolutionContext } from "./ServiceResolutionContext";
 import { ServiceResolutionError } from "./ServiceResolutionError";
 import type {
-  NamedServiceRecord,
+  NamedServiceKey,
   ResolvedServicesTuple,
   ServiceTokensTuple,
   ServicesMap,
@@ -58,7 +58,7 @@ export class Context<TServicesMap extends ServicesMap>
    * Services resolution stack.
    * @private
    */
-  private readonly resolutionStack: NamedServiceRecord<TServicesMap>[];
+  private readonly resolutionStack: NamedServiceKey<TServicesMap>[];
 
   /**
    * Delayed callbacks, executed after all dependencies stack resolution of current service resolution.
@@ -143,7 +143,7 @@ export class Context<TServicesMap extends ServicesMap>
   /**
    * @inheritDoc
    */
-  getStack(): NamedServiceRecord<TServicesMap>[] {
+  getStack(): NamedServiceKey<TServicesMap>[] {
     return [...this.resolutionStack];
   }
 

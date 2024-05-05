@@ -22,7 +22,7 @@ export type ServiceResolvingKey<
   | (ResolvedType extends object ? Constructor<ResolvedType> : never);
 
 /**
- * Utility type. Infers NamedServiceRecord, resolving given ResolvedType. Used for typing class dependencies tuple.
+ * Utility type. Infers NamedServiceKey, resolving given ResolvedType. Used for typing class dependencies tuple.
  */
 type ServiceResolvingToken<TServicesMap extends ServicesMap, ResolvedType> = {
   /**

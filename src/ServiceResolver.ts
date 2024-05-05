@@ -49,19 +49,19 @@ export type ResolvedByKey<
 /**
  * Object containing service key and name.
  */
-export interface NamedServiceRecord<TServicesMap extends ServicesMap> {
+export interface NamedServiceKey<TServicesMap extends ServicesMap> {
   service: ServiceKey<TServicesMap>;
   name: string;
 }
 
 /**
- * Type guard for NamedServiceRecord.
+ * Type guard for NamedServiceKey.
  *
  * @param obj
  */
-export function isNamedServiceRecord(
+export function isNamedServiceKey(
   obj: unknown
-): obj is NamedServiceRecord<object> {
+): obj is NamedServiceKey<object> {
   return (
     typeof obj === "object" &&
     obj !== null &&
@@ -73,11 +73,11 @@ export function isNamedServiceRecord(
 }
 
 /**
- * ServiceKey or NamedServiceRecord. Used for services tuple resolution, declaring class dependencies etc.
+ * ServiceKey or NamedServiceKey. Used for services tuple resolution, declaring class dependencies etc.
  */
 export type ServiceToken<TServicesMap extends ServicesMap> =
   | ServiceKey<TServicesMap>
-  | NamedServiceRecord<TServicesMap>;
+  | NamedServiceKey<TServicesMap>;
 
 /**
  * Tuple of ServiceToken's.
@@ -93,7 +93,7 @@ export type ResolvedByToken<
   TServicesMap extends ServicesMap,
   TServiceToken extends ServiceToken<TServicesMap>,
 > =
-  TServiceToken extends NamedServiceRecord<TServicesMap>
+  TServiceToken extends NamedServiceKey<TServicesMap>
     ? ResolvedByKey<TServicesMap, TServiceToken["service"]>
     : TServiceToken extends keyof TServicesMap
       ? ResolvedByKey<TServicesMap, TServiceToken>

@@ -1,4 +1,4 @@
-import type { NamedServiceRecord, ServicesMap } from "./ServiceResolver";
+import type { NamedServiceKey, ServicesMap } from "./ServiceResolver";
 import { stringifyServiceKey } from "./stringifyServiceKey";
 
 /**
@@ -16,7 +16,7 @@ export class ServiceResolutionError<
    */
   constructor(
     message: string,
-    readonly resolutionStack: NamedServiceRecord<TServicesMap>[],
+    readonly resolutionStack: NamedServiceKey<TServicesMap>[],
     readonly cause?: Error | unknown
   ) {
     const resolutionStackMessage = resolutionStack

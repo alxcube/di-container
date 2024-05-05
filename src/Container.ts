@@ -21,8 +21,8 @@ import {
   type ServiceKey,
   type ResolvedByKey,
   type Constructor,
-  isNamedServiceRecord,
-  type NamedServiceRecord,
+  isNamedServiceKey,
+  type NamedServiceKey,
 } from "./ServiceResolver";
 import { stringifyServiceKey } from "./stringifyServiceKey";
 
@@ -526,14 +526,14 @@ export class Container<TServicesMap extends ServicesMap>
       const resolvedDeps = (
         deps as unknown as (
           | ServiceKey<TServicesMap>
-          | NamedServiceRecord<TServicesMap>
+          | NamedServiceKey<TServicesMap>
           | ConstantToken<unknown>
         )[]
       ).map((dep) => {
         if (isConstantToken(dep)) {
           return dep.constant;
         }
-        if (isNamedServiceRecord(dep)) {
+        if (isNamedServiceKey(dep)) {
           return context.resolve(dep.service, dep.name);
         }
         return context.resolve(dep as ServiceKey<TServicesMap>);

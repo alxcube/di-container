@@ -1,5 +1,5 @@
 import type {
-  NamedServiceRecord,
+  NamedServiceKey,
   ServiceKey,
   ServiceResolver,
   ServicesMap,
@@ -15,7 +15,7 @@ export interface ServiceResolutionContext<TServicesMap extends ServicesMap>
    * The first element (at index 0) is the root service, for which dependencies are resolved. The last element is
    * service name, being resolved at the moment (which ServiceFactory is called).
    */
-  getStack(): NamedServiceRecord<TServicesMap>[];
+  getStack(): NamedServiceKey<TServicesMap>[];
 
   /**
    * Returns true, when current service is being resolved as ancestor dependency for given service key. Ignores
