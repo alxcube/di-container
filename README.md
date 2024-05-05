@@ -19,7 +19,8 @@ Implementation of Dependency Injection Container pattern.
 
 ### Service Resolution Context
 
-Service resolution context is a special object available in service factories.
+Service resolution context is a special object available in
+[service factories](#service-factory).
 This object provides methods for retrieving services that are dependencies of the service
 being created by the factory. It exists within the scope of a single root service request.
 Additionally, it provides methods to determine whether the current service is being
@@ -53,15 +54,42 @@ name them according to the names of your application's interfaces.
 
 Index signature (`[key: string]: any;`) should not be used, since it breaks type inference.
 
+```ts
+interface ServicesMap {}
+```
+
 ### Service Key
 
 Service key is either a key of the [service map](#service-map) interface or a class
 constructor. Services are registered and retrieved from the container using this key.
 
+```ts
+type ServiceKey<TServicesMap extends ServicesMap> =
+  | keyof TServicesMap
+  | Constructor<object>
+```
+
+### Named Service Key
+
+Object with two properties: `service` - the [service key](#service-key), and `name` -
+the service name.
+
+```ts
+interface NamedServiceKey<TServicesMap extends ServicesMap> {
+  service: ServiceKey<TServicesMap>;
+  name: string;
+}
+```
+
 ### Service Token
 
-Service Token is an object that has two properties: `'service'` - the
-[service key](#service-key), and `'name'` - the service name.
+Type alias for union of service key and named service key.
+
+```ts
+type ServiceToken<TServicesMap extends ServicesMap> =
+  | ServiceKey<TServicesMap>
+  | NamedServiceKey<TServicesMap>;
+```
 
 ### Constant Token
 
@@ -73,14 +101,14 @@ the container and are passed directly to the class constructor in methods
 ### Dependencies Tuple
 
 Dependencies tuple is a special type of tuple whose members are
-[Service keys](#service-key), [Service tokens](#service-token), or
-[Constant tokens](#constant-token), from which values of the corresponding type are
-resolved. It is used for declaratively specifying the dependencies of a class constructor
-in the methods registerClassConfig(), implement(), and instantiate().
+[service tokens](#service-token), or [constant tokens](#constant-token), from which
+values of the corresponding type are resolved. It is used for declaratively specifying the
+dependencies of a class constructor in the methods `registerClassConfig()`, `implement()`,
+and `instantiate()`.
 
 ## Usage
 
-### Create service map
+### Create Service Map
 
 First of all, you need to create a [service map](#service-map) and specify in it the
 types of services that will be available in the container.
@@ -100,7 +128,7 @@ export interface TypesMap extends ServicesMap {
 }
 ```
 
-### Creating container
+### Creating Container
 
 After declaring service map, you are now ready to create container instance:
 
@@ -112,11 +140,11 @@ import type { TypesMap } from "./TypesMap";
 export const container = new Container<TypesMap>();
 ```
 
-### Resolving services
+### Resolving Services
 
 There are several methods for resolving services from container.
 
-#### Resolving single service
+#### Resolving Single Service
 
 To retrieve a service from the container, you use the `resolve()` method. It takes the
 [service key](#service-key) as an argument and returns a value of the corresponding type.
@@ -140,7 +168,7 @@ const httpClient: HttpClient = container.resolve("HttpClient");
 const paymentsApiHttpClient = container.resolve("HttpClient", "payment");
 ```
 
-#### Resolving array of services
+#### Resolving Array Of Services
 
 The resolveAll() method takes a service key and returns an array of services of the
 corresponding type registered under different names. If there are no registrations for
@@ -151,12 +179,11 @@ this service in the container, an empty array will be returned.
 const httpClients = container.resolveAll("HttpClient");
 ```
 
-#### Resolving tuple of services
+#### Resolving Tuple Of Services
 
 To obtain a tuple of services, you use the `resolveTuple()` method. It takes a tuple as
-an argument, whose members are either [service keys](#service-key) or
-[service tokens](#service-token). The return value is a tuple of the corresponding
-services.
+an argument, whose members are [service tokens](#service-token). The return value is a
+tuple of the corresponding services.
 
 This method can be useful when you need to retrieve multiple services from the container
 within the same context, when the services have a `'request'` lifecycle. Using this method for
@@ -171,12 +198,12 @@ const [backendApiClient, httpClient] = container.resolveTuple([
   {
     service: "HttpClient",
     name: "backend"
-  }, // Named services can be resolved, using ServiceToken interface
+  }, // Named services can be resolved, using NamedServiceKey interface
   "BackendApiClient"
 ] as const); // Don't forget "as const" to make type inference work
 ```
 
-#### Retrieving service names
+#### Retrieving Service Names
 
 Using the `getServiceNames()` method, you can obtain an array of all names under which a
 service with the given [service key](#service-key) has been registered. If the service
@@ -291,8 +318,9 @@ To free you from routine and make class factory registration more declarative, t
 argument, and as the second argument, it accepts a
 [tuple of dependencies](#dependencies-tuple), the corresponding members of which will be
 used to extract the constructor dependencies in the respective order.
+
 The third argument is an options object. In addition to options of
-[`registerFactory()`](#registering-service-factory) method, there are 2 other options:
+[`registerFactory()`](#registering-service-factory) method, there are one more option:
 * `circular` - this should be set to true, when class has circular dependencies. See
 details below in corresponding section.
 
@@ -306,7 +334,7 @@ You can use the `constant()` helper for convenience in creating constant tokens.
 ```ts 
 import { constant } from "@alxcube/di-container";
 
-// Register different configurations with constant 
+// Register different configurations with constant token
 container.registerClassConfig(
   TextDecoder,
   [{ constant: "utf-8" }],
@@ -390,7 +418,7 @@ interface AppServiceMap {
 }
 ```
 
-Then pass the keys of the single type and the corresponding array to the
+Then pass the keys of the single type and the corresponding array type to the
 `createArrayResolver()` method:
 
 ```ts
@@ -513,8 +541,8 @@ console.log(parentContainer.has("HttpClient")); // false
 ### Circular dependencies
 
 
-If your classes have cyclic dependencies, and for some reason you cannot refactor to
-eliminate them, there are 2 ways to register classes with cyclic dependencies.
+If your classes have circular dependencies, and for some reason you cannot refactor to
+eliminate them, there are 2 ways to register classes with circular dependencies.
 
 #### Using `circular()` Helper
 
@@ -567,7 +595,7 @@ available in your application environment, although this is unlikely.
 
 To implement this approach, your class dependencies must be injected through public
 properties or must have setter methods. Additionally, the `"singleton"` or `"request"`
-lifecycle is a mandatory requirement for cyclic dependencies.
+lifecycle is a mandatory requirement for such circular dependencies.
 
 You can pass a callback to the `delay()` method of the [context object](#service-resolution-context)
 in the [service factory](#service-factory), in which you can resolve and set the necessary
@@ -687,3 +715,63 @@ beforeEach(() => {
   backendClient = container.instantiate(ConcreteBackendClient, ["HttpClient"]);
 })
 ```
+
+### Contextual Dependencies Resolving
+
+To contextually resolve dependencies, you can use the methods `isResolvingFor()` and
+`isDirectlyResolvingFor()` of the [context object](#service-resolution-context) inside
+[service factories](#service-factory). Both methods take a [service key](#service-key) and
+an optional service name as parameters.
+
+The first method returns `true` if the current
+service (returned by the factory) is resolved as a dependency at any level for the
+corresponding service. This means, for example, that the current service can be a
+dependency of a dependency of the service whose key is passed to the method.
+
+The second method is similar to the first one but checks if the current service is a
+direct dependency of the corresponding service.
+
+If the `name` argument is not provided, only the service key is considered, and the
+name is ignored. To check if the current service is resolved specifically for the
+default registration of another service, pass `"default"` as the second argument
+explicitly.
+
+You can also get the entire current dependency resolution stack by calling the `getStack()`
+method of the context object. The stack is an array of
+[named service keys](#named-service-key), where the first element is the service key
+requested from the container, and the last element is the key of the current service
+(in whose factory the check is performed).
+
+Note that for this factory to work correctly, it must have a `'transient'` lifecycle.
+
+```ts
+// Register class configs for implementations (this may be singletons)
+container.registerClassConfig(LocalFileSystemDriver, [], { lifecycle: "singleton" });
+container.registerClassConfig(CloudFileSystemDriver, ["HttpClient"]);
+
+// Register contextual service factory (this must be transient)
+container.registerFactory("FileSystem", (context) => {
+  if (context.isResolvingFor("UserpicRepository")) {
+    return context.resolve(LocalFileSystemDriver);
+  }
+  return context.resolve(CloudFileSystemDriver);
+});
+```
+
+### Service Resolution Error
+
+When an error occurs during the resolution of a service, a `ServiceResolutionError` will
+be thrown.
+
+This error class contains a `stack` property representing the service resolution stack.
+The stack is an array of [named service keys](#named-service-key), where the first element
+is the service key requested from the container, and the last element is the key of the
+service in whose factory the error occurred.
+
+The `cause` property of the `ServiceResolutionError` object contains the caught value that
+caused the failure.
+
+The `message` property contains a string that includes the string representation of the
+caught value, as well as the textual representation of the resolution stack in reverse
+order: the first line of the stack represents the key and name of the service in whose
+factory the error occurred.
