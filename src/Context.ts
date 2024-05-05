@@ -93,7 +93,6 @@ export class Context<TServicesMap extends ServicesMap>
     this.resolutionStack.push({ service: key, name });
     let service: ResolvedByKey<TServicesMap, TServiceKey>;
     try {
-      this.checkForCircularDependency();
       service = this.doResolve(key, name);
       this.executeDelayed();
       return service;
@@ -276,6 +275,7 @@ export class Context<TServicesMap extends ServicesMap>
     >
   ): ResolvedByKey<TServicesMap, TServiceKey> {
     try {
+      this.checkForCircularDependency();
       return factory(this);
     } catch (e) {
       if (e instanceof ServiceResolutionError) {
@@ -410,10 +410,7 @@ export class Context<TServicesMap extends ServicesMap>
 
     // Circular dependency detected.
     const circularPath = first.join(" < ") + ` < (CIRCULAR) ${current}`;
-    throw new ServiceResolutionError(
-      `Circular dependency detected: ${circularPath}`,
-      this.getStack()
-    );
+    throw new Error(`Circular dependency detected: ${circularPath}`);
   }
 
   /**

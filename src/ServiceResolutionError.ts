@@ -17,7 +17,7 @@ export class ServiceResolutionError<
   constructor(
     message: string,
     readonly resolutionStack: NamedServiceKey<TServicesMap>[],
-    readonly cause?: Error | unknown
+    readonly cause: Error | unknown
   ) {
     const resolutionStackMessage = resolutionStack
       .slice()
