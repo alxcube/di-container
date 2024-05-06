@@ -1,7 +1,6 @@
 {
   "name": "@alxcube/di-container",
-  "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "main": "./dist/di-container.umd.cjs",
   "module": "./dist/di-container.js",
@@ -19,7 +18,16 @@
     "prettier": "prettier --write 'src/**/*.ts' && prettier --write 'spec/**/*.ts'"
   },
   "author": "Alexander Alexandrov <alxcube@gmail.com>",
+  "description": "Simple but flexible type-safe dependency injection container for TypeScript applications.",
+  "keywords": ["dependency injection", "inversion of control", "service container", "ioc", "di"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alxcube/di-container.git"
+  },
   "license": "MIT",
+  "files": [
+    "dist/"
+  ],
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
     "@types/node": "^20.12.7",
