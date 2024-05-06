@@ -19,10 +19,16 @@
   },
   "author": "Alexander Alexandrov <alxcube@gmail.com>",
   "description": "Simple but flexible type-safe dependency injection container for TypeScript applications.",
-  "keywords": ["dependency injection", "inversion of control", "service container", "ioc", "di"],
+  "keywords": [
+    "dependency injection",
+    "inversion of control",
+    "service container",
+    "ioc",
+    "di"
+  ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/alxcube/di-container.git"
+    "url": "git+https://github.com/alxcube/di-container.git"
   },
   "license": "MIT",
   "files": [
