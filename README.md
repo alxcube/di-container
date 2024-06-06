@@ -213,7 +213,7 @@ calls to `resolve()` on the `ServiceResolutionContext` object will already retur
 within the context of the same request.
 
 ```ts
-const [backendApiClient, httpClient] = container.resolveTuple([
+const [httpClient, backendApiClient] = container.resolveTuple([
   {
     service: "HttpClient",
     name: "backend"
@@ -257,14 +257,14 @@ service with the given key (and name) is already registered, a `TypeError` will 
 
 ```ts
 // Register string constant
-container.register("applicationKey", "my_app_key");
+container.registerConstant("applicationKey", "my_app_key");
 
 // Register interface implementation as singleton
-container.register("HttpClient", new ConcreteHttpClient(), { name: "payments" });
+container.registerConstant("HttpClient", new ConcreteHttpClient(), { name: "payments" });
 
 // Replace registered services
-container.register("applicationKey", "other_app_key", { replace: true });
-container.register("HttpClient", new ConcreteHttpClient(), { name: "payments", replace: true });
+container.registerConstant("applicationKey", "other_app_key", { replace: true });
+container.registerConstant("HttpClient", new ConcreteHttpClient(), { name: "payments", replace: true });
 ```
 
 #### Registering Service Factory

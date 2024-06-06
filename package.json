@@ -1,6 +1,6 @@
 {
   "name": "@alxcube/di-container",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "main": "./dist/di-container.umd.cjs",
   "module": "./dist/di-container.js",
